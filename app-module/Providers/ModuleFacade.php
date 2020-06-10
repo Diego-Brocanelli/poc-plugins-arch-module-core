@@ -19,8 +19,11 @@ class ModuleFacade extends Facade
 {
     protected static function getFacadeAccessor()
     {
+        $namespace = (new ModuleConfig)->config('module_namespace');
+        $sufix = Str::snake($namespace);
+        
         // aqui, deve-se retornar a mesma string definida no registro do módulo .
         // Ex: $this->app->alias(\App\Module\Core\Module::class, 'module-core');
-        return 'module-core';
+        return "module-{$sufix}";
     }
 }

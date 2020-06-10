@@ -6,6 +6,7 @@ namespace App\Module\Core\Console;
 
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Arr;
+use App\Module\Core\Providers\ModuleConfig;
 
 class ComposerScripts
 {
@@ -26,39 +27,13 @@ class ComposerScripts
     }
     
     /**
-     * Carrega as configurações existentes neste módulo
-     * e as disponibiliza com o formato de notação pontuada 'module_core.minha_conf.legal'.
+     * Obtem o valor de um parâmetro de configuração existente neste módulo.
+     * A busca deve ser feira usando a notação pontuada do Laravel.
+     * Ex.: module_core.minha_conf.legal
      */
     private function config(string $param)
     {
-        if ($this->moduleConfig === null) {
-        
-            $path = __DIR__ . '/../../config/';
-            $list = scandir($path);
-            array_map(function($file) use($path) {
-            
-                if (in_array($file, ['.', '..']) === true) {
-                    return $path;
-                }
-                
-                $configName = str_replace(['-', '.php'], ['_',''], $file);
-                $this->moduleConfig[$configName] = include realpath($path . $file);
-                
-                if ($this->moduleConfigFirst === null) {
-                    $this->moduleConfigFirst = $configName;
-                }
-                
-            }, $list);
-
-            $this->moduleConfig = Arr::dot($this->moduleConfig);
-        }
-        
-        if ($this->moduleConfig === null) {
-            return null;
-        }
-        
-        return $this->moduleConfig[$param] 
-            ?? $this->moduleConfig["{$this->moduleConfigFirst}.{$param}"];
+        return (new ModuleConfig)->config($param);
     }
 
     /**
@@ -88,13 +63,13 @@ class ComposerScripts
     }
 
     /**
-     * Manipula o evento de 'post-autoload-dump'.
+     * Manipula o evento de 'pre-autoload-dump'.
      *
      * @param  \Composer\Script\Event  $event
      * @return void
      * @see https://getcomposer.org/apidoc/master/Composer/Script/Event.html
      */
-    public static function postAutoloadDump($event)
+    public static function preAutoloadDump($event)
     {
         $script = self::instance();
         $laravelPath = $script->config('module_core.laravel_install_path');
@@ -114,6 +89,7 @@ class ComposerScripts
 
     /**
      * Atualiza o módulo automaticamente na instalação do Laravel.
+     * Para não precisar executar "composer update".
      *
      * @return void
      */
@@ -129,6 +105,11 @@ class ComposerScripts
         $config = @json_decode(file_get_contents($composerJson));
         if (json_last_error() !== JSON_ERROR_NONE) {
             $event->getIO()->error("O arquivo {$composerJson} é inválido, ou está corrompido");
+        }
+
+        $laravelVendor = $laravel->basePath("vendor");
+        if (is_dir($laravelVendor) === false) {
+            $event->getIO()->error("O diretório {$laravelVendor} não foi encontrado");
         }
 
         $develPath = getcwd();
@@ -162,7 +143,7 @@ class ComposerScripts
         while(false !== ( $file = readdir($dir)) ) { 
             if (( $file != '.' ) && ( $file != '..' )) { 
                 if ( is_dir($source . '/' . $file) ) { 
-                    copyDirectory($source . '/' . $file,$destination . '/' . $file); 
+                    $this->copyDirectory($source . '/' . $file,$destination . '/' . $file); 
                 } else { 
                     copy($source . '/' . $file,$destination . '/' . $file); 
                 } 

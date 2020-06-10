@@ -1,11 +1,11 @@
-#!/usr/bin/env php
 <?php
 
 declare(strict_types=1);
 
 use Illuminate\Foundation\Application as ConsoleApplication;
+use Illuminate\Support\Arr;
 use App\Console\Kernel as ConsoleKernel;
-use Bnw\Tools;
+use App\Module\Core\Providers\ModuleConfig;
 
 define('LARAVEL_START', microtime(true));
 
@@ -13,6 +13,10 @@ require __DIR__.'/vendor/autoload.php';
 
 class Application extends ConsoleApplication
 {
+    private static $moduleConfig;
+    
+    private static $moduleConfigFirst;
+    
     protected $appPath;
 
     protected $databasePath;
@@ -23,7 +27,25 @@ class Application extends ConsoleApplication
 
     protected $environmentFile = '.env';
 
-    protected $namespace = 'Bnw\\Core\\';
+    /**
+     * Muda o namespace utilizado pelo Laravel para criar arquivos.
+     *
+     * @param string $namespace
+     */
+    public function useModuleNamespace(string $namespace)
+    {
+        $this->namespace = $namespace;
+    }
+    
+    /**
+     * Obtem o valor de um parâmetro de configuração existente neste módulo.
+     * A busca deve ser feira usando a notação pontuada do Laravel.
+     * Ex.: module_core.minha_conf.legal
+     */
+    public static function config(string $param)
+    {
+        return (new ModuleConfig)->config($param);
+    }
 }
 
 
@@ -31,24 +53,23 @@ class Kernel extends ConsoleKernel
 {
     protected function commands()
     {
-        $this->commands = Tools\ServiceProvider::toolsCommands();
+        // Para adicionar comandos adicionais 
+        // $this->commands = Tools\ServiceProvider::toolsCommands();
         return parent::commands();
     }
 }
 
-// Para impedir a utilização do artisan do modulo dentro do docker
-if (Tools\Tools::instance()->runIn() === Tools\Tools::RUN_IN_DOCKER) {
-    throw new RuntimeException("It is not allowed to use commands inside the docker");
-}
+$laravelPath = \Application::config('laravel_install_path');
 
 $app = new \Application(
     $_ENV['APP_BASE_PATH'] ?? __DIR__.'/vendor/laravel/laravel'
 );
 
-$app->useAppPath(__DIR__ . '/src');
-$app->useDatabasePath(__DIR__ . '/src/Database');
-$app->useStoragePath(__DIR__ . '/.docker/laravel/storage');
-$app->useEnvironmentPath(__DIR__ . '/.docker/laravel/app');
+$app->useModuleNamespace("App\\Module\\" . \Application::config('module_namespace'));
+$app->useAppPath(__DIR__ . '/app-module');
+$app->useDatabasePath(__DIR__ . '/database');
+$app->useStoragePath($laravelPath . '/storage');
+$app->useEnvironmentPath($laravelPath);
 
 $app->singleton(
     Illuminate\Contracts\Console\Kernel::class,

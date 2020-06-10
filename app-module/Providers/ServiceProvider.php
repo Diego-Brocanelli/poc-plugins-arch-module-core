@@ -6,6 +6,7 @@ namespace App\Module\Core\Providers;
 
 use App\Module\Core\Console\Commands\CoreCommand;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use Illuminate\Support\Str;
 
 /**
  * O serviceProvider é a forma que um pacote se comunicar com o projeto principal do Laravel.
@@ -17,8 +18,6 @@ use Illuminate\Support\ServiceProvider as BaseServiceProvider;
  */
 class ServiceProvider extends BaseServiceProvider
 {
-    private $moduleSufix = 'core';
-    
     /**
      * Este método é invocado pelo Laravel apenas após todos os pacotes serem registrados.
      * Veja o método register().
@@ -29,6 +28,8 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function boot()
     {
+        $sufix = $this->sufix();
+    
         if ($this->app->runningInConsole()) {
 
             // Aqui devem ser registrados quantos comandos forem necesários
@@ -40,8 +41,8 @@ class ServiceProvider extends BaseServiceProvider
         // Arquivos publicados pelo artisan:
         // Ex: php artisan vendor:publish --tag=modules --force
         $this->publishes([
-            __DIR__.'/../../public' => public_path("modules/{$this->moduleSufix}"),
-            __DIR__."/../../config/module_{$this->moduleSufix}.php" => config_path("module_{$this->moduleSufix}.php"),
+            __DIR__.'/../../public' => public_path("modules/{$sufix}"),
+            __DIR__."/../../config/module_{$sufix}.php" => config_path("module_{$sufix}.php"),
         ], 'modules');
 
         include_once 'Helpers.php';
@@ -58,24 +59,34 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
+        $sufix = $this->sufix();
+    
+        $rootPath = realpath(__DIR__."/../../");
+        
         // O 'mergeConfigFrom' junta os valores do arquivo de configuração disponíveis no módulo
         // com o o arquivo de mesmo nome, publicado no projeto principal do Laravel
         // para que não existam inconsistencias ou ausência de parâmetros usados pelo módulo
-        $this->mergeConfigFrom(__DIR__.'/../../config/module-{$this->moduleSufix}.php', "module_{$this->moduleSufix}");
+        $this->mergeConfigFrom("{$rootPath}/config/module_{$sufix}.php", "module_{$sufix}");
 
-        $this->loadRoutesFrom(__DIR__ . '/../../routes/web.php');
-        $this->loadRoutesFrom(__DIR__ . '/../../routes/api.php');
+        $this->loadRoutesFrom("{$rootPath}/routes/web.php");
+        $this->loadRoutesFrom("{$rootPath}/routes/api.php");
 
         // Nos templates do Blade as views do módulo devem ser utilizadas com prefixo.
         // Ao invés de @include('minha.linda.view'), 
         // deve-se usar @include('core::minha.linda.view')
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views/', "module-{$this->moduleSufix}");
+        $this->loadViewsFrom("{$rootPath}/resources/views/", "module-{$sufix}");
         
-        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations/', "module-{$this->moduleSufix}");
-        $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang/', "module-{$this->moduleSufix}");
+        $this->loadMigrationsFrom("{$rootPath}/database/migrations/", "module-{$sufix}");
+        $this->loadTranslationsFrom("{$rootPath}/resources/lang/", "module-{$sufix}");
 
         // Disponibiliza a classe principal do módulo como um alias acessível
         // pelo namespace 'module-core'
-        $this->app->alias(Module::class, "module-{$this->moduleSufix}");
+        $this->app->alias(Module::class, "module-{$sufix}");
+    }
+    
+    private function sufix()
+    {
+        $namespace = (new ModuleConfig)->config('module_namespace');
+        return Str::snake($namespace);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-use App\Module\Core\Providers;
+use App\Module\Core\Providers\Module;
 
 if (function_exists('dummy_core_helpers') === false) {
 
@@ -8,22 +8,22 @@ if (function_exists('dummy_core_helpers') === false) {
 
     function main_js()
     {
-        return Core::instance()->mainJs();
+        return Module::instance()->mainJs();
     }
 
     function main_css()
     {
-        return Core::instance()->mainCss();
+        return Module::instance()->mainCss();
     }
 
     function module_js()
     {
-        return Core::instance()->moduleJs();
+        return Module::instance()->moduleJs();
     }
 
     function module_css()
     {
-        return Core::instance()->moduleCss();
+        return Module::instance()->moduleCss();
     }
 
 }

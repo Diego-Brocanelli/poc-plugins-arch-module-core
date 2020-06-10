@@ -13,7 +13,7 @@
     </head>
     <body>
 
-	    @yield('content')
+	    @yield('body')
         
         {!! main_js() !!}
         {!! module_js() !!}
