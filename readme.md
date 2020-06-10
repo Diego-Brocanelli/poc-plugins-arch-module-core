@@ -15,3 +15,17 @@ Updating dependencies (including require-dev)
 
 > Personal Accesse Tokens: https://github.com/settings/tokens
 
+
+https://getcomposer.org/doc/05-repositories.md#loading-a-package-from-a-vcs-repository
+
+
+{
+            "type": "path",
+            "url": "../poc-plugins-arch-module-core",
+            "options": {
+                // Tem que ser falso para poder obter o pacote fora do laravel
+                // senão o docker não terá visibilidade para fazer o link
+                "symlink": false
+            }
+        }
+

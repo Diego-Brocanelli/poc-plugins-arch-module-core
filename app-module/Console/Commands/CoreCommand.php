@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Module\Console\Commands;
+namespace App\Module\Core\Console\Commands;
 
 use Illuminate\Console\Command;
 

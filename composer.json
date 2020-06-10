@@ -56,6 +56,10 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "scripts": {
+        "post-autoload-dump": [
+            "App\\Module\\Core\\Console\\ComposerScripts::postAutoloadDump"
+            
+        ],
         "test": [
             "vendor/bin/phpunit"
         ]
