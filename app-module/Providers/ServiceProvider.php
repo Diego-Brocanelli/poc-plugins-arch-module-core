@@ -59,18 +59,18 @@ class ServiceProvider extends BaseServiceProvider
         // O 'mergeConfigFrom' junta os valores do arquivo de configuração disponíveis no módulo
         // com o o arquivo de mesmo nome, publicado no projeto principal do Laravel
         // para que não existam inconsistencias ou ausência de parâmetros usados pelo módulo
-        $this->mergeConfigFrom(__DIR__.'/../config/module-core.php', 'module-core');
+        $this->mergeConfigFrom(__DIR__.'/../../config/module-core.php', 'module-core');
 
-        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
-        $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
+        $this->loadRoutesFrom(__DIR__ . '/../../routes/web.php');
+        $this->loadRoutesFrom(__DIR__ . '/../../routes/api.php');
 
         // Nos templates do Blade as views do módulo devem ser utilizadas com prefixo.
         // Ao invés de @include('minha.linda.view'), 
         // deve-se usar @include('core::minha.linda.view')
-        $this->loadViewsFrom(__DIR__ . '/../resources/views/', 'module-core');
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views/', 'module-core');
         
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations/', 'module-core');
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang/', 'module-core');
+        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations/', 'module-core');
+        $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang/', 'module-core');
 
         // Disponibiliza a classe principal do módulo como um alias acessível
         // pelo namespace 'module-core'
