@@ -1,0 +1,72 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Foundation\Application as ConsoleApplication;
+use App\Console\Kernel as ConsoleKernel;
+use Bnw\Tools;
+
+define('LARAVEL_START', microtime(true));
+
+require __DIR__.'/vendor/autoload.php';
+
+class Application extends ConsoleApplication
+{
+    protected $appPath;
+
+    protected $databasePath;
+
+    protected $storagePath;
+
+    protected $environmentPath;
+
+    protected $environmentFile = '.env';
+
+    protected $namespace = 'Bnw\\Core\\';
+}
+
+
+class Kernel extends ConsoleKernel
+{
+    protected function commands()
+    {
+        $this->commands = Tools\ServiceProvider::toolsCommands();
+        return parent::commands();
+    }
+}
+
+// Para impedir a utilização do artisan do modulo dentro do docker
+if (Tools\Tools::instance()->runIn() === Tools\Tools::RUN_IN_DOCKER) {
+    throw new RuntimeException("It is not allowed to use commands inside the docker");
+}
+
+$app = new \Application(
+    $_ENV['APP_BASE_PATH'] ?? __DIR__.'/vendor/laravel/laravel'
+);
+
+$app->useAppPath(__DIR__ . '/src');
+$app->useDatabasePath(__DIR__ . '/src/Database');
+$app->useStoragePath(__DIR__ . '/.docker/laravel/storage');
+$app->useEnvironmentPath(__DIR__ . '/.docker/laravel/app');
+
+$app->singleton(
+    Illuminate\Contracts\Console\Kernel::class,
+    \Kernel::class
+);
+
+$app->singleton(
+    Illuminate\Contracts\Debug\ExceptionHandler::class,
+    App\Exceptions\Handler::class
+);
+
+$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+
+$status = $kernel->handle(
+    $input = new Symfony\Component\Console\Input\ArgvInput,
+    new Symfony\Component\Console\Output\ConsoleOutput
+);
+
+$kernel->terminate($input, $status);
+
+exit($status);

@@ -36,16 +36,16 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Bnw\\Module\\Core\\Providers\\ServiceProvider"
+                "App\\Module\\Core\\Providers\\ServiceProvider"
             ],
             "aliases": {
-                "Core": "Bnw\\Module\\Core\\Providers\\CoreFacade"
+                "Core": "App\\Module\\Core\\Providers\\CoreFacade"
             }
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "App\\Module\\Core\\Tests\\": "tests-module/"
+            "Tests\\Module\\Core\\": "tests-module/"
         }
     },
     "config": {

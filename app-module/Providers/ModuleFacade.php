@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Module\Core;
+namespace App\Module\Core\Providers;
 
 use Illuminate\Support\Facades\Facade;
 

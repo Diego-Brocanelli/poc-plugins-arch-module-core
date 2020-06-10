@@ -1,6 +1,6 @@
 <?php
 
-use App\Module\Core\Core;
+use App\Module\Core\Providers;
 
 if (function_exists('dummy_core_helpers') === false) {
 

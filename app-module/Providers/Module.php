@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Module\Core;
+namespace App\Module\Core\Providers;
 
 /**
  * Esta é a classe que permite acesso a todas as funcionalidades do módulo.
