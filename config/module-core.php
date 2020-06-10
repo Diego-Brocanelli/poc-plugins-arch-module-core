@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 return [
 
-    'laravel-install-path' => dir(),
+    'laravel-install-path' => '',
     
     // Para invocar essa configuração, deve-se usar config('core.module_name')
     'module_name' => 'core',
