@@ -83,10 +83,6 @@ class ServiceProvider extends BaseServiceProvider
         
         $this->loadMigrationsFrom("{$rootPath}/database/migrations/", "module-{$sufix}");
         $this->loadTranslationsFrom("{$rootPath}/resources/lang/", "module-{$sufix}");
-
-        // Disponibiliza a classe principal do módulo como um alias acessível
-        // pelo namespace 'module-core'
-        $this->app->alias(Module::class, "module-{$sufix}");
     }
     
     private function sufix()
