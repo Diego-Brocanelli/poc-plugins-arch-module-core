@@ -9,9 +9,8 @@ return [
 
     // 'App\Module\Core' para classes e 'module-core' para aliases
     'module_namespace' => 'Core', 
-    
-    // O caminho para a instalação do Laravel é usada quando o modulo está sendo desenvolvido
-    'laravel_install_path' => realpath(__DIR__ . '/../../laravel'),
-    
-    'theme' => 'bnw/poc-plugins-arch-theme-01'
+
+    // Apenas para desenvolvimento! Este parâmetro notifica o Artisan 
+    // do pacote sobre a localização da instalação principal do Laravel.
+    'laravel_path' => realpath(__DIR__ . '/../../laravel'),
 ];

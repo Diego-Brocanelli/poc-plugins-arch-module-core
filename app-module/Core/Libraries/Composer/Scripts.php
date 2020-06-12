@@ -2,28 +2,36 @@
 
 declare(strict_types=1);
 
-namespace App\Module\Core\Console;
+namespace App\Module\Core\Libraries\Composer;
 
+use App\Module\Core\Libraries\Plugins\Config;
+use Illuminate\Console\Scheduling\Event;
 use Illuminate\Foundation\Application;
-use Illuminate\Support\Arr;
-use App\Module\Core\Providers\ModuleConfig;
 
-class ComposerScripts
+class Scripts
 {
     private static $instance;
-    
-    private $moduleConfigFirst;
-    
-    private $moduleConfig;
     
     protected static function instance()
     {
         if (static::$instance === null) {
-            static::$instance = new self();
+            static::$instance = new Scripts();
             static::$instance->bootstrap();
         }
         
         return static::$instance;
+    }
+
+    private function bootstrap()
+    {
+        require __DIR__ . '/../../../../vendor/autoload.php';
+        
+        $laravelPath = self::instance()->config('module_core.laravel_path');
+
+        if (is_file("{$laravelPath}/.env") === false) {
+            $event->getIO()->error("O diretório {$laravelPath} não parece conter uma instalação válida do Laravel");
+        }
+
     }
     
     /**
@@ -33,7 +41,7 @@ class ComposerScripts
      */
     private function config(string $param)
     {
-        return (new ModuleConfig)->config($param);
+        return (new Config(__DIR__ . '/../../../../config'))->param($param);
     }
 
     /**
@@ -45,7 +53,7 @@ class ComposerScripts
     public static function postInstall(Event $event)
     {
         $script = self::instance();
-        $laravelPath = $script->config('module_core.laravel_install_path');
+        $laravelPath = $script->config('module_core.laravel_path');
         $script->clearCompiled($event, $laravelPath);
     }
 
@@ -58,7 +66,7 @@ class ComposerScripts
     public static function postUpdate(Event $event)
     {
         $script = self::instance();
-        $laravelPath = $script->config('module_core.laravel_install_path');
+        $laravelPath = $script->config('module_core.laravel_path');
         $script->clearCompiled($event, $laravelPath);
     }
 
@@ -72,19 +80,9 @@ class ComposerScripts
     public static function preAutoloadDump($event)
     {
         $script = self::instance();
-        $laravelPath = $script->config('module_core.laravel_install_path');
+        $laravelPath = $script->config('module_core.laravel_path');
         $script->updateModule($event, $laravelPath);
         $script->clearCompiled($event, $laravelPath);
-    }
-    
-    private function bootstrap()
-    {
-        require __DIR__ . '/../../vendor/autoload.php';
-        
-        $laravelPath = self::instance()->config('module_core.laravel_install_path');
-        if (is_file("{$laravelPath}/.env") === false) {
-            $event->getIO()->error("O diretório {$laravelPath} não parece conter uma instalação válida do Laravel");
-        }
     }
 
     /**
@@ -116,6 +114,9 @@ class ComposerScripts
         $installedPath = $laravel->basePath("vendor/{$config->name}");
         shell_exec("rm -Rf {$installedPath}");
         $this->copyDirectory($develPath, $installedPath);
+
+        // Publica os assets
+        shell_exec("cd $laravelPath; php artisan vendor:publish --tag=assets --force");
     }
     
     /**
@@ -151,5 +152,5 @@ class ComposerScripts
         } 
         
         closedir($dir); 
-    } 
+    }
 }

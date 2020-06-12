@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Tests\Module\Core\Unit;
+namespace Tests\Module\Unit;
 
-use Tests\Module\Core\TestCase;
+use Tests\Module\TestCase;
+// use \PHPUnit\Framework\TestCase;
 
 class ExampleTest extends TestCase
 {

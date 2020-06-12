@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 
-if (env('APP_ENV') === 'local' && env('APP_DEBUG') === true) {
+if (in_array(env('APP_ENV'), ['local', 'testing']) && env('APP_DEBUG') === true) {
     
     Route::get('/core/test', function () {
         return view('module-core::test')->with([ 'title' => 'Teste Um']);

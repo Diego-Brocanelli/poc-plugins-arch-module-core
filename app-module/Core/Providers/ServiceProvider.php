@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Module\Core\Providers;
 
 use App\Module\Core\Console\Commands\CoreCommand;
+use App\Module\Core\Libraries\Plugins\Handler;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\Support\Str;
 
@@ -29,6 +30,8 @@ class ServiceProvider extends BaseServiceProvider
     public function boot()
     {
         $sufix = $this->sufix();
+        
+        $rootPath = realpath(__DIR__."/../../../");
     
         if ($this->app->runningInConsole()) {
 
@@ -41,11 +44,12 @@ class ServiceProvider extends BaseServiceProvider
         // Arquivos publicados pelo artisan:
         // Ex: php artisan vendor:publish --tag=modules --force
         $this->publishes([
-            __DIR__.'/../../public' => public_path("modules/{$sufix}"),
-            __DIR__."/../../config/module_{$sufix}.php" => config_path("module_{$sufix}.php"),
-        ], 'modules');
-
-        include_once 'Helpers.php';
+            "{$rootPath}/public" => public_path("modules/{$sufix}"),
+        ], 'assets');
+        
+        $this->publishes([
+            "{$rootPath}/config/module_{$sufix}.php" => config_path("module_{$sufix}.php"),
+        ], "module-{$sufix}");
     }
 
     /**
@@ -59,9 +63,10 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
+        Handler::instance()->registerModule(self::class);
+
         $sufix = $this->sufix();
-    
-        $rootPath = realpath(__DIR__."/../../");
+        $rootPath = realpath(__DIR__."/../../../");
         
         // O 'mergeConfigFrom' junta os valores do arquivo de configuração disponíveis no módulo
         // com o o arquivo de mesmo nome, publicado no projeto principal do Laravel
@@ -86,7 +91,7 @@ class ServiceProvider extends BaseServiceProvider
     
     private function sufix()
     {
-        $namespace = (new ModuleConfig)->config('module_namespace');
+        $namespace = Handler::instance()->module('core')->config()->param('module_namespace');
         return Str::snake($namespace);
     }
 }

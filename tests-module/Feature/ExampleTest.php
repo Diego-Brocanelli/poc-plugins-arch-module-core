@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Module\Core\Feature;
+namespace Tests\Module\Feature;
 
-use Tests\Module\Core\TestCase;
+use Tests\Module\TestCase;
 
 class ExampleTest extends TestCase
 {
@@ -27,8 +27,7 @@ class ExampleTest extends TestCase
     {
         $response = $this->withSession(['foo' => 'bar'])
                     ->get('/api/core/call-test');
-
-         $response->assertStatus(200);
+        $response->assertStatus(200);
     }
 
     /** @test */

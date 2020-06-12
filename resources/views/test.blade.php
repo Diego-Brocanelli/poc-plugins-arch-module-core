@@ -1,3 +1,10 @@
 @extends('module-core::document')
 
-<h1>{{ $title }}</h2>
+@section('title', $title)
+
+@section('body')
+    
+    <h1>{{ $title }}</h1>
+    
+@endsection
+

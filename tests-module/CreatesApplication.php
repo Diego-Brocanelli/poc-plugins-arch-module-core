@@ -2,27 +2,45 @@
 
 declare(strict_types=1);
 
-namespace Tests\Module\Core;
+namespace Tests\Module;
 
-use Bnw\Core\ServiceProvider;
+use App\Module\Core\Libraries\Plugins\Handler;
 use Illuminate\Contracts\Console\Kernel;
+use App\Module\Core\Libraries\Composer\Parser;
 
 trait CreatesApplication
 {
     public function createApplication()
     {
-        // A aplicação padrão do Laravel está instalada como dependência do composer
-        $app = require dirname(__DIR__).'/vendor/laravel/laravel/bootstrap/app.php';
+        $laravelPath = Handler::instance()
+             ->registerModule(\App\Module\Core\Providers\ServiceProvider::class)
+             ->lastModule()
+             ->config()->param('module_core.laravel_path');
+            
+        $laravelPath = __DIR__ . "/../../laravel";
+
+        $app = require "{$laravelPath}/bootstrap/app.php";
 
         // Muda a localização do diretório de ambiente. 
         // Onde se encontra o .env
-        $app->useEnvironmentPath(__DIR__.'/../../.docker/laravel/app/');
+        $app->useEnvironmentPath($laravelPath);
+        $app->useStoragePath($laravelPath . '/storage');
 
         $app->make(Kernel::class)->bootstrap();
 
-        // Disponibiliza este módulo para o Laravel
-        $app->register(ServiceProvider::class);
-
+        $config = (new Parser(__DIR__ . '/../composer.json'))->all(true);
+        
+        if (isset($config['extra']) 
+         && isset($config['extra']['laravel'])
+         && isset($config['extra']['laravel']['providers'])
+        ) {
+        
+            // Disponibiliza os providers do módulo para o artisan
+            foreach($config['extra']['laravel']['providers'] as $moduleProvider) {
+                $app->register($moduleProvider);
+            }
+        }
+        
         return $app;
     }
 }
