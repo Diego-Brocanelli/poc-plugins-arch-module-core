@@ -1,4 +1,4 @@
-@extends('module-core::document')
+@extends('core::document')
 
 @section('title', $title)
 

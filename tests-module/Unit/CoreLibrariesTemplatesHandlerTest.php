@@ -40,7 +40,7 @@ class CoreLibrariesTemplatesHandlerTest extends TestCase
     public function registerInvalidPrototype()
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("A view core::'prototype.not-exists' correspondente ao protótipo 'prototype.not-exists' não existe no Módulo Core");
+        $this->expectExceptionMessage("A view 'prototype.not-exists' correspondente ao protótipo 'prototype.not-exists' não existe no Módulo Core");
         $instance = Handler::instance();
         $instance->registerView('prototype.not-exists','view.not-exists');
     }
@@ -51,7 +51,24 @@ class CoreLibrariesTemplatesHandlerTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("A view 'view.not-exists' não foi encontrada no sistema e por isso não foi registrada");
         $instance = Handler::instance();
-        $instance->registerView('body','view.not-exists');
+        $instance->registerView('core::unit_tests.test-body','view.not-exists');
+    }
+
+    /** @test */
+    public function register()
+    {
+        $instance = Handler::instance();
+
+        $this->assertCount(0, $instance->allReplaces());
+
+        $instance->registerView('core::unit_tests.test-document', 'core::unit_tests.test-document-replaced');
+        $this->assertCount(1, $instance->allReplaces());
+        $this->assertEquals([
+            "core::unit_tests.test-document" => "core::unit_tests.test-document-replaced"
+        ], $instance->allReplaces());
+
+        $instance->removeView('core::unit_tests.test-document-replaced');
+        $this->assertCount(0, $instance->allReplaces());
     }
 
     /** @test */
@@ -71,7 +88,7 @@ class CoreLibrariesTemplatesHandlerTest extends TestCase
         $instance = Handler::instance();
 
         // O pai imediatamente a cima deve ser substituído
-        $instance->registerView('unit_tests.test-document', 'core::unit_tests.test-document-replaced');
+        $instance->registerView('core::unit_tests.test-document', 'core::unit_tests.test-document-replaced');
         $this->assertCount(1, $instance->allReplaces());
         $render = view('core::unit_tests.test-body')->with('name', 'nice')->render();
         $this->assertEquals('<html id="replaced" name="nice"> <body id="original" name="nice"></body> </html>', $render);
@@ -83,7 +100,7 @@ class CoreLibrariesTemplatesHandlerTest extends TestCase
         $instance = Handler::instance();
 
         // O avô deve ser substituído
-        $instance->registerView('unit_tests.test-document', 'core::unit_tests.test-document-replaced');
+        $instance->registerView('core::unit_tests.test-document', 'core::unit_tests.test-document-replaced');
         $this->assertCount(1, $instance->allReplaces());
         $render = view('core::unit_tests.test-component')->with('name', 'nice')->render();
         $this->assertEquals('<html id="replaced" name="nice"> <body id="original" name="nice"> <div name="nice">Testado Componente</div> </body> </html>', $render);
@@ -91,7 +108,7 @@ class CoreLibrariesTemplatesHandlerTest extends TestCase
         $this->flushLaravelCache();
 
         // Ambos são substrituidos
-        $instance->registerView('unit_tests.test-body', 'core::unit_tests.test-body-replaced');
+        $instance->registerView('core::unit_tests.test-body', 'core::unit_tests.test-body-replaced');
         $this->assertCount(2, $instance->allReplaces());
         $render = view('core::unit_tests.test-component')->with('name', 'nice')->render();
         $this->assertEquals('<html id="replaced" name="nice"> <body id="replaced" name="nice"> <div name="nice">Testado Componente</div> </body> </html>', $render);
@@ -103,7 +120,7 @@ class CoreLibrariesTemplatesHandlerTest extends TestCase
         $instance = Handler::instance();
 
         // Somente o pai deve ser substituído, mantendo o avô
-        $instance->registerView('unit_tests.test-body', 'core::unit_tests.test-body-replaced');
+        $instance->registerView('core::unit_tests.test-body', 'core::unit_tests.test-body-replaced');
         $this->assertCount(1, $instance->allReplaces());
         $render = view('core::unit_tests.test-component')->with('name', 'nice')->render();
         $this->assertEquals('<html id="original" name="nice"> <body id="replaced" name="nice"> <div name="nice">Testado Componente</div> </body> </html>', $render);

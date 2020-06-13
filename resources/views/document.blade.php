@@ -7,14 +7,14 @@
         <title>@yield('title')</title>
 
         @foreach(front_styles() as $style)
-
         <link rel="stylesheet" href="{{ $style }}">
         @endforeach
 
-        {{-- O script principal é carregado antes de todos os outros --}}
-        <script src="{{ front_scripts()[0] }}"></script>
+        @stack('styles')
 
-	    @stack('styles')
+        @foreach(front_scripts_top() as $script)
+        <script src="{{ $script }}"></script>
+        @endforeach
         
     </head>
 
