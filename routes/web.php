@@ -12,7 +12,6 @@ if (in_array(env('APP_ENV'), ['local', 'testing']) && env('APP_DEBUG') === true)
     
     Route::namespace('App\Module\Core\Http\Controllers')->group(function(){
         Route::get('/core/test/two', 'ExampleController@show')->name('example');
-        Route::get('/core/info', 'InfoController@show')->name('');
     });
     
 }

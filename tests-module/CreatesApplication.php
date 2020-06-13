@@ -16,9 +16,7 @@ trait CreatesApplication
              ->registerModule(\App\Module\Core\Providers\ServiceProvider::class)
              ->lastModule()
              ->config()->param('module_core.laravel_path');
-            
-        $laravelPath = __DIR__ . "/../../laravel";
-
+        
         $app = require "{$laravelPath}/bootstrap/app.php";
 
         // Muda a localização do diretório de ambiente. 
@@ -34,7 +32,7 @@ trait CreatesApplication
          && isset($config['extra']['laravel'])
          && isset($config['extra']['laravel']['providers'])
         ) {
-        
+            
             // Disponibiliza os providers do módulo para o artisan
             foreach($config['extra']['laravel']['providers'] as $moduleProvider) {
                 $app->register($moduleProvider);

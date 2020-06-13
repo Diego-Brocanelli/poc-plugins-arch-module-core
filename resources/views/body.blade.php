@@ -17,7 +17,17 @@
 	    @stack('styles')
         
     </head>
+    <body>
 
-    @yield('body')
+	    @yield('body')
+        
+        @foreach(front_scripts() as $index => $script)
+            @if($index > 0)
+            <script src="{{ $script }}"></script>
+            @endif
+        @endforeach
 
+	    @stack('scripts')
+
+    </body>
 </html>

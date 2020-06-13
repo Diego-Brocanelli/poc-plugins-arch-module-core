@@ -11,8 +11,15 @@ use Illuminate\Foundation\Application;
 class Scripts
 {
     private static $instance;
+
+    private $laravelPath;
     
-    protected static function instance()
+    private function __construct()
+    {
+        // acesso somente através do singleton
+    }
+
+    public static function instance(): Scripts
     {
         if (static::$instance === null) {
             static::$instance = new Scripts();
@@ -22,16 +29,15 @@ class Scripts
         return static::$instance;
     }
 
-    private function bootstrap()
+    private function bootstrap(): void
     {
         require __DIR__ . '/../../../../vendor/autoload.php';
         
-        $laravelPath = self::instance()->config('module_core.laravel_path');
+        $this->laravelPath = self::instance()->config('module_core.laravel_path');
 
-        if (is_file("{$laravelPath}/.env") === false) {
-            $event->getIO()->error("O diretório {$laravelPath} não parece conter uma instalação válida do Laravel");
+        if (is_file("{$this->laravelPath}/.env") === false) {
+            $event->getIO()->error("O diretório {$this->laravelPath} não parece conter uma instalação válida do Laravel");
         }
-
     }
     
     /**
@@ -53,8 +59,7 @@ class Scripts
     public static function postInstall(Event $event)
     {
         $script = self::instance();
-        $laravelPath = $script->config('module_core.laravel_path');
-        $script->clearCompiled($event, $laravelPath);
+        $script->clearCompiled();
     }
 
     /**
@@ -66,8 +71,7 @@ class Scripts
     public static function postUpdate(Event $event)
     {
         $script = self::instance();
-        $laravelPath = $script->config('module_core.laravel_path');
-        $script->clearCompiled($event, $laravelPath);
+        $script->clearCompiled();
     }
 
     /**
@@ -80,9 +84,8 @@ class Scripts
     public static function preAutoloadDump($event)
     {
         $script = self::instance();
-        $laravelPath = $script->config('module_core.laravel_path');
-        $script->updateModule($event, $laravelPath);
-        $script->clearCompiled($event, $laravelPath);
+        $script->updateModule($event);
+        $script->clearCompiled();
     }
 
     /**
@@ -91,9 +94,9 @@ class Scripts
      *
      * @return void
      */
-    protected function updateModule($event, string $laravelPath)
+    protected function updateModule($event)
     {
-        $laravel = new Application($laravelPath);
+        $laravel = new Application($this->laravelPath);
 
         $composerJson = getcwd() . "/composer.json";
         if (is_file($composerJson) === false) {
@@ -116,7 +119,7 @@ class Scripts
         $this->copyDirectory($develPath, $installedPath);
 
         // Publica os assets
-        shell_exec("cd $laravelPath; php artisan vendor:publish --tag=assets --force");
+        shell_exec("cd {$this->laravelPath}; php artisan vendor:publish --tag=assets --force");
     }
     
     /**
@@ -124,9 +127,9 @@ class Scripts
      *
      * @return void
      */
-    protected function clearCompiled($event, string $laravelPath)
+    public function clearCompiled()
     {
-        $laravel = new Application($laravelPath);
+        $laravel = new Application($this->laravelPath);
 
         if (file_exists($servicesPath = $laravel->getCachedServicesPath())) {
             @unlink($servicesPath);
@@ -135,6 +138,15 @@ class Scripts
         if (file_exists($packagesPath = $laravel->getCachedPackagesPath())) {
             @unlink($packagesPath);
         }
+    }
+
+    public function clearCache()
+    {
+        shell_exec(implode(";", [
+            "cd {$this->laravelPath}", 
+            "php artisan view:cache",
+            "php artisan optimize:clear"
+        ]));
     }
     
     private function copyDirectory(string $source, string $destination): void

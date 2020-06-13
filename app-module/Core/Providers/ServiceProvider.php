@@ -6,7 +6,7 @@ namespace App\Module\Core\Providers;
 
 use App\Module\Core\Console\Commands\CoreCommand;
 use App\Module\Core\Libraries\Plugins\Handler;
-use Illuminate\Support\ServiceProvider as BaseServiceProvider;
+use App\Module\Core\Libraries\Templates\Directives;
 use Illuminate\Support\Str;
 
 /**
@@ -17,8 +17,23 @@ use Illuminate\Support\Str;
  * Para mais informações sobre pacotes do Laravel,
  * leia https://laravel.com/docs/7.x/packages
  */
-class ServiceProvider extends BaseServiceProvider
+class ServiceProvider extends ModuleServiceProvider
 {
+    protected function sufix(): string
+    {
+        return 'core';
+    }
+
+    /**
+     * Deve retornar o caminho completo para o diretório raiz do módulo
+     * 
+     * @return string
+     */
+    protected function modulePath(): string
+    {
+        return realpath(__DIR__."/../../../");
+    }
+
     /**
      * Este método é invocado pelo Laravel apenas após todos os pacotes serem registrados.
      * Veja o método register().
@@ -29,27 +44,11 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function boot()
     {
-        $sufix = $this->sufix();
-        
-        $rootPath = realpath(__DIR__."/../../../");
-    
-        if ($this->app->runningInConsole()) {
+        parent::boot();
 
-            // Aqui devem ser registrados quantos comandos forem necesários
-            $this->commands([
-                CoreCommand::class,
-            ]);
-        }
+        (new Directives())->boot();
 
-        // Arquivos publicados pelo artisan:
-        // Ex: php artisan vendor:publish --tag=modules --force
-        $this->publishes([
-            "{$rootPath}/public" => public_path("modules/{$sufix}"),
-        ], 'assets');
-        
-        $this->publishes([
-            "{$rootPath}/config/module_{$sufix}.php" => config_path("module_{$sufix}.php"),
-        ], "module-{$sufix}");
+        // Adaptações aqui ...
     }
 
     /**
@@ -63,31 +62,9 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-        Handler::instance()->registerModule(self::class);
+        parent::register();
 
-        $sufix = $this->sufix();
-        $rootPath = realpath(__DIR__."/../../../");
         
-        // O 'mergeConfigFrom' junta os valores do arquivo de configuração disponíveis no módulo
-        // com o o arquivo de mesmo nome, publicado no projeto principal do Laravel
-        // para que não existam inconsistencias ou ausência de parâmetros usados pelo módulo
-        $this->mergeConfigFrom("{$rootPath}/config/module_{$sufix}.php", "module_{$sufix}");
-
-        $this->loadRoutesFrom("{$rootPath}/routes/web.php");
-        $this->loadRoutesFrom("{$rootPath}/routes/api.php");
-
-        // Nos templates do Blade as views do módulo devem ser utilizadas com prefixo.
-        // Ao invés de @include('minha.linda.view'), 
-        // deve-se usar @include('core::minha.linda.view')
-        $this->loadViewsFrom("{$rootPath}/resources/views/", "module-{$sufix}");
-        
-        $this->loadMigrationsFrom("{$rootPath}/database/migrations/", "module-{$sufix}");
-        $this->loadTranslationsFrom("{$rootPath}/resources/lang/", "module-{$sufix}");
-    }
-    
-    private function sufix()
-    {
-        $namespace = Handler::instance()->module('core')->config()->param('module_namespace');
-        return Str::snake($namespace);
+        // Adaptações aqui ...
     }
 }

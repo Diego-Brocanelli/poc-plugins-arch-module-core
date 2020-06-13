@@ -19,7 +19,9 @@ class Module
     
     private $moduleProviders = [];
 
-    private $assetScripts = [];
+    private $assetScriptsTop = [];
+
+    private $assetScriptsBottom = [];
 
     private $assetStyles = [];
 
@@ -40,7 +42,11 @@ class Module
         foreach($config as $params) {
 
             if (isset($params['scripts'])) {
-                array_walk($params['scripts'], fn($item) => $this->addScript($item));
+                array_walk($params['scripts'], fn($item) => $this->addScriptBottom($item));
+            }
+
+            if (isset($params['scripts_top'])) {
+                array_walk($params['scripts_top'], fn($item) => $this->addScriptTop($item));
             }
 
             if (isset($params['styles'])) {
@@ -133,11 +139,19 @@ class Module
         return "/modules/" . $this->tag();
     }
 
-    public function addScript(string $scriptName): Module
+    public function addScriptTop(string $scriptName): Module
     {
         // evita scripts duplicados
         $prefix = $this->formatPrefixUrl();
-        $this->assetScripts[$scriptName] = "{$prefix}/js/$scriptName";
+        $this->assetScriptsTop[$scriptName] = "{$prefix}/js/$scriptName";
+        return $this;
+    } 
+
+    public function addScriptBottom(string $scriptName): Module
+    {
+        // evita scripts duplicados
+        $prefix = $this->formatPrefixUrl();
+        $this->assetScriptsBottom[$scriptName] = "{$prefix}/js/$scriptName";
         return $this;
     } 
 
@@ -156,9 +170,19 @@ class Module
         return $this;
     }
 
+    public function scriptsTop(): array
+    {
+        return $this->assetScriptsTop;
+    }
+
+    public function scriptsBottom(): array
+    {
+        return $this->assetScriptsBottom;
+    }
+
     public function scripts(): array
     {
-        return $this->assetScripts;
+        return array_merge($this->assetScriptsTop, $this->assetScriptsBottom);
     }
 
     public function styles(): array

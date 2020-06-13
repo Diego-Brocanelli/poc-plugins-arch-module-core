@@ -48,6 +48,11 @@ class Handler
         return static::$instance;
     }
 
+    /**
+      * Zera as informações do manupulador de plugins.
+      * Isso é utilizado, principalemnet, para efetuar testes de unidade 
+      * sem interferência de rotinas anteriormente executadas
+      */
     public function flush(): Handler
     {
         $this->modules       = [];
@@ -61,6 +66,10 @@ class Handler
         return $this;
     }
 
+    /**
+      * Os assets são resolvidos sempre que o estado de algum plugin ou tema mudar.
+      * Este método é responsável por forçar a nova resolução!
+      */
     private function flushAssets(): Handler
     {
         $this->assets = null;
@@ -146,6 +155,11 @@ class Handler
 
         $this->themes[$theme->tag()] = $theme;
         $this->themesMap[$serviceProviderClass] = $theme->tag();
+
+        // O primeiro tema registrado é marcado como ativo por padrão
+        if ($this->activeTheme === null) {
+            $this->setActiveTheme($theme->tag());
+        }
 
         return $this;
     }
@@ -242,35 +256,53 @@ class Handler
         if ($this->assets === null) {
             
             $assets = [
-                'scripts' => [],
-                'styles'  => [],
+                'scripts_top'    => [],
+                'scripts_bottom' => [],
+                'scripts'        => [],
+                'styles'         => [],
             ];
 
             // Os assets principais sempre estão presentes.
-            // Entre eles se concontra: Boosttrap4, SweetAlert, Axios, etc
-            $assets['scripts'][] = '/modules/core/js/core.js';
+            // Entre eles se concontra: Bootstrap4, SweetAlert, Axios, etc
+            $assets['scripts_top'][] = '/modules/core/js/core.js';
             $assets['styles'][]  = '/modules/core/css/core.css';
 
             // Os assets do tema servem para adaptar a aparência do
             // sistema como um todo, modificando o Bootstrap4 e
             // os componentes adicionais como o SweetAlert, por exemplo
             $theme = $this->activeTheme();
-            $assets['scripts'] = array_merge($assets['scripts'], array_values($theme->scripts()));
-            $assets['styles']  = array_merge($assets['styles'], array_values($theme->styles()));
+            $assets['scripts_top']    = array_merge($assets['scripts_top'], array_values($theme->scriptsTop()));
+            $assets['scripts_bottom'] = array_merge($assets['scripts_bottom'], array_values($theme->scriptsBottom()));
+            $assets['styles']         = array_merge($assets['styles'], array_values($theme->styles()));
 
             // Por último, são acrregados os assets do módulo em execução,
             // para que seja possível ao módulo modificar algum script ou estilo
             // proveniente do Core ou do Tema
             $module = $this->currentModule();
             if ($module !== null) {
-                $assets['scripts'] = array_merge($assets['scripts'], array_values($module->scripts()));
-                $assets['styles']  = array_merge($assets['styles'], array_values($module->styles()));
+                $assets['scripts_top']    = array_merge($assets['scripts_top'], array_values($module->scriptsTop()));
+                $assets['scripts_bottom'] = array_merge($assets['scripts_bottom'], array_values($module->scriptsBottom()));
+                $assets['styles']         = array_merge($assets['styles'], array_values($module->styles()));
             }
+
+            $assets['scripts'] = array_merge($assets['scripts_top'], $assets['scripts_bottom']);
 
             $this->assets = $assets;
         }
 
         return $this->assets;
+    }
+
+    public function scriptsTop()
+    {
+        $assets = $this->resolveAssets();
+        return $assets['scripts_top'] ?? [];
+    }
+
+    public function scriptsBottom()
+    {
+        $assets = $this->resolveAssets();
+        return $assets['scripts_bottom'] ?? [];
     }
 
     public function scripts()

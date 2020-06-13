@@ -1,0 +1,1 @@
+<html id="original" name="{{ $name ?? '' }}">@yield('body')</html>

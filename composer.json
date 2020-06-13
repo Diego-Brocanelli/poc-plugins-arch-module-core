@@ -65,7 +65,7 @@
             "App\\Module\\Core\\Libraries\\Composer\\Scripts::preAutoloadDump"
         ],
         "test": [
-            "vendor/bin/phpunit"
+            "composer dumpautoload --ansi; vendor/bin/phpunit"
         ]
     }
     

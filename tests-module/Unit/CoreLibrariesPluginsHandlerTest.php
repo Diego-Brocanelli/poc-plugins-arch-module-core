@@ -163,17 +163,17 @@ class CoreLibrariesPluginsHandlerTest extends TestCase
     public function activateTheme()
     {
         $instance = Handler::instance();
+        
+        $this->assertInstanceOf(ThemeDefault::class, $instance->activeTheme());
 
         $instance->registerTheme(ServiceProviderOne::class);
         $instance->registerTheme(ServiceProviderTwo::class);
-        $this->assertInstanceOf(ThemeDefault::class, $instance->activeTheme());
-
-        // De alguma forma, o sistema deverá setar o tema atualmente em uso
-        // seja através de uma configuração implementada ou diretamente no código fonte
-        $instance->setActiveTheme(ServiceProviderOne::class);
-        $this->assertNotInstanceOf(ThemeDefault::class, $instance->activeTheme());
+        $this->assertInstanceOf(Theme::class, $instance->activeTheme());
         $this->assertEquals('One', $instance->activeTheme()->name());
         $this->assertEquals('one', $instance->activeTheme()->tag());
+
+        // De alguma forma, o sistema deverá ser capaz de setar o tema atualmente em uso
+        // seja através de uma configuração implementada ou diretamente no código fonte
 
         $instance->setActiveTheme(ServiceProviderTwo::class);
         $this->assertEquals('Two', $instance->activeTheme()->name());
@@ -186,8 +186,6 @@ class CoreLibrariesPluginsHandlerTest extends TestCase
         $this->expectException(Exception::class);
 
         $instance = Handler::instance();
-        $instance->registerTheme(ServiceProviderOne::class);
-        $instance->registerTheme(ServiceProviderTwo::class);
         $this->assertInstanceOf(ThemeDefault::class, $instance->activeTheme());
 
         // Tema inexistente
@@ -199,37 +197,49 @@ class CoreLibrariesPluginsHandlerTest extends TestCase
     {
         $instance = Handler::instance();
         $instance->registerModule(ServiceProviderTwo::class);
-        $instance->registerTheme(ServiceProviderOne::class);
         $this->assertNull($instance->currentModule());
         $this->assertInstanceOf(ThemeDefault::class, $instance->activeTheme());
 
         // Assets padrões
+        $this->assertCount(1, $instance->scriptsTop());
+        $this->assertEquals('/modules/core/js/core.js', $instance->scriptsTop()[0]);
         $this->assertCount(1, $instance->scripts());
         $this->assertEquals('/modules/core/js/core.js', $instance->scripts()[0]);
         $this->assertCount(1, $instance->styles());
         $this->assertEquals('/modules/core/css/core.css', $instance->styles()[0]);
 
-        $instance->setCurrentModule(ServiceProviderTwo::class);
+        // Veja: tests-module/files/Fake/ModuleOne/config/module_one.php
+        $instance->registerTheme(ServiceProviderOne::class);
 
-        // Veja: tests-module/files/Fake/ModuleTwo/config/module_two.php
+        $this->assertCount(2, $instance->scriptsTop());
+        $this->assertEquals('/modules/core/js/core.js', $instance->scriptsTop()[0]);
+        $this->assertEquals('/themes/one/js/legal.js', $instance->scriptsTop()[1]);
+        $this->assertCount(1, $instance->scriptsBottom());
+        $this->assertEquals('/themes/one/js/module.js', $instance->scriptsBottom()[0]);
         $this->assertCount(3, $instance->scripts());
         $this->assertEquals('/modules/core/js/core.js', $instance->scripts()[0]);
-        $this->assertEquals('/modules/two/js/shorenaitis.js', $instance->scripts()[1]);
-        $this->assertEquals('/modules/two/js/birineiders.js', $instance->scripts()[2]);
-
-        // Veja: tests-module/files/Fake/ModuleTwo/config/module_two.php
+        $this->assertEquals('/themes/one/js/legal.js', $instance->scripts()[1]);
+        $this->assertEquals('/themes/one/js/module.js', $instance->scripts()[2]);
         $this->assertCount(2, $instance->styles());
         $this->assertEquals('/modules/core/css/core.css', $instance->styles()[0]);
-        $this->assertEquals('/modules/two/css/shoooo.css', $instance->styles()[1]);
+        $this->assertEquals('/themes/one/css/module.css', $instance->styles()[1]);
 
+        // Veja: tests-module/files/Fake/ModuleTwo/config/module_two.php
+        $instance->setCurrentModule(ServiceProviderTwo::class);
 
-        $instance->setActiveTheme(ServiceProviderOne::class);
+        $this->assertCount(2, $instance->scriptsTop());
+        $this->assertEquals('/modules/core/js/core.js', $instance->scriptsTop()[0]);
+        $this->assertEquals('/themes/one/js/legal.js', $instance->scriptsTop()[1]);
 
-        // Veja: tests-module/files/Fake/ModuleOne/config/module_one.php
+        $this->assertCount(3, $instance->scriptsBottom());
+        $this->assertEquals('/themes/one/js/module.js', $instance->scriptsBottom()[0]);
+        $this->assertEquals('/modules/two/js/shorenaitis.js', $instance->scriptsBottom()[1]);
+        $this->assertEquals('/modules/two/js/birineiders.js', $instance->scriptsBottom()[2]);
+
         $this->assertCount(5, $instance->scripts());
         $this->assertEquals('/modules/core/js/core.js', $instance->scripts()[0]);
-        $this->assertEquals('/themes/one/js/module.js', $instance->scripts()[1]);
-        $this->assertEquals('/themes/one/js/legal.js', $instance->scripts()[2]);
+        $this->assertEquals('/themes/one/js/legal.js', $instance->scripts()[1]);
+        $this->assertEquals('/themes/one/js/module.js', $instance->scripts()[2]);
         $this->assertEquals('/modules/two/js/shorenaitis.js', $instance->scripts()[3]);
         $this->assertEquals('/modules/two/js/birineiders.js', $instance->scripts()[4]);
 

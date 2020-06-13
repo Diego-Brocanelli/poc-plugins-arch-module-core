@@ -15,6 +15,9 @@ return [
 
     'scripts' => [
         'module.js',
+    ],
+
+    'scripts_top' => [
         'legal.js',
     ],
 
