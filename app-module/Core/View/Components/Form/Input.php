@@ -19,7 +19,7 @@ class Input extends Component
     public $class;
     public $min;
     public $max;
-    public $buttonLabel = 'Selecione';
+    public $buttonLabel;
 
     public function __construct(
         $name, $label = null, $placeholder = null, $help = null, $mask = null, $required = false, $disabled = false,
@@ -37,7 +37,7 @@ class Input extends Component
         $this->class       = $class;
         $this->min         = $min;
         $this->max         = $max;
-        $this->buttonLabel = $buttonLabel;
+        $this->buttonLabel = $buttonLabel ?? 'Selecione';
     }
 
     public function render()
