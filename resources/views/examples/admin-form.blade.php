@@ -8,7 +8,7 @@ a substituição dinâmica das views através do Templates\Handler.
 
 @section('page-area')
 
-    <form class="needs-validation was-validated" novalidate>
+    <form class="needs-validation" novalidate onsubmit="$(this).addClass('was-validated'); $('html, body').animate({scrollTop:0}); return false;">
 
         <div class="form-row">
             <x-core-form:input-text 
@@ -17,15 +17,15 @@ a substituição dinâmica das views através do Templates\Handler.
                 name="nome" 
                 place="Preencha seu nome" 
                 mask="dd/mm/yyyy HH:MM" 
-                tip_valid="Corretíssimo"
-                tip_invalid="Algo está errado!"
                 required="true"
                 />
             <x-core-form:select name="seletor" class="col-md-6"/>
         </div>
 
         <div class="form-row">
-            <x-core-form:input-email name="email" class="col-md-6"/>
+            <x-core-form:input-email name="email" class="col-md-6"
+                tip-valid="Corretíssimo"
+                tip-invalid="Algo está errado!"/>
             <x-core-form:input-password name="senha" class="col-md-6"/>
         </div>
 
@@ -43,7 +43,7 @@ a substituição dinâmica das views através do Templates\Handler.
         <x-core-form:textarea name="texto" />
 
         <div class="form-row">
-            <x-core-form:input-file name="upload" class="col-md-3" buttonLabel="Escolher"/>
+            <x-core-form:input-file name="upload" class="col-md-3" button-label="Escolher"/>
             <x-core-form:input-file name="upload2" class="col-md-3"/>
         </div>
 
