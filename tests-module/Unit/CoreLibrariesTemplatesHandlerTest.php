@@ -6,13 +6,8 @@ namespace Tests\Module\Unit;
 
 use App\Module\Core\Libraries\Templates\Handler;
 use Error;
-use Illuminate\Support\Facades\Artisan;
 use InvalidArgumentException;
 use Tests\Module\TestCase;
-
-// Atenção!
-// Os testes devem extender 'Tests\Module\TestCase'!!
-// Este é um caso a parte para testar o mecanismo principal 
 
 class CoreLibrariesTemplatesHandlerTest extends TestCase
 {
@@ -124,5 +119,24 @@ class CoreLibrariesTemplatesHandlerTest extends TestCase
         $this->assertCount(1, $instance->allReplaces());
         $render = view('core::unit_tests.test-component')->with('name', 'nice')->render();
         $this->assertEquals('<html id="original" name="nice"> <body id="replaced" name="nice"> <div name="nice">Testado Componente</div> </body> </html>', $render);
+    }
+
+    /** @test */
+    public function includeNoReplace()
+    {
+        $instance = Handler::instance();
+
+        $render = view('core::unit_tests.test-include')->with('name', 'Nice')->render();
+        $this->assertEquals('<div> Original Nice </div>', $render);
+    }
+
+    /** @test */
+    public function includeReplaced()
+    {
+        $instance = Handler::instance();
+
+        $instance->registerView('core::unit_tests.test-included', 'core::unit_tests.test-included-replaced');
+        $render = view('core::unit_tests.test-include')->with('name', 'Cool')->render();
+        $this->assertEquals('<div> Replaced Cool </div>', $render);
     }
 }

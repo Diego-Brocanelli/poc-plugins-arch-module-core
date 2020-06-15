@@ -1,3 +1,4 @@
+#!/usr/bin/php
 <?php
 
 declare(strict_types=1);
@@ -5,7 +6,10 @@ declare(strict_types=1);
 use Illuminate\Foundation\Application as ConsoleApplication;
 use Illuminate\Support\Arr;
 use App\Console\Kernel as ConsoleKernel;
+use App\Module\Core\Libraries\Plugins\Config;
+use App\Module\Core\Libraries\Plugins\Handler;
 use App\Module\Core\Providers\ModuleConfig;
+use App\Module\Core\Providers\ServiceProvider;
 
 define('LARAVEL_START', microtime(true));
 
@@ -13,10 +17,6 @@ require __DIR__.'/vendor/autoload.php';
 
 class Application extends ConsoleApplication
 {
-    private static $moduleConfig;
-    
-    private static $moduleConfigFirst;
-    
     protected $appPath;
 
     protected $databasePath;
@@ -42,9 +42,9 @@ class Application extends ConsoleApplication
      * A busca deve ser feira usando a notação pontuada do Laravel.
      * Ex.: module_core.minha_conf.legal
      */
-    public static function config(string $param)
+    public static function config(string $name)
     {
-        return (new ModuleConfig)->config($param);
+        return (new Config(__DIR__ . '/config'))->param($name);
     }
 }
 
@@ -59,14 +59,14 @@ class Kernel extends ConsoleKernel
     }
 }
 
-$laravelPath = \Application::config('laravel_install_path');
+$laravelPath = \Application::config('laravel_path');
 
 $app = new \Application(
     $_ENV['APP_BASE_PATH'] ?? __DIR__.'/vendor/laravel/laravel'
 );
 
 $app->useModuleNamespace("App\\Module\\" . \Application::config('module_namespace'));
-$app->useAppPath(__DIR__ . '/app-module');
+$app->useAppPath(__DIR__ . '/app-module/Core');
 $app->useDatabasePath(__DIR__ . '/database');
 $app->useStoragePath($laravelPath . '/storage');
 $app->useEnvironmentPath($laravelPath);

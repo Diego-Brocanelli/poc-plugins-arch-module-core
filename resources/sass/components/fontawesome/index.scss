@@ -1,0 +1,20 @@
+
+// --------------------------------------------------------------------------
+// Font Awesome v5
+// Copyright (c) 2018 FontAwesome Team
+// --------------------------------------------------------------------------
+// - Dave Gandy (https://github.com/davegandy)
+// - Travis Chase (https://github.com/supercodepoet)
+// - Rob Madole (https://github.com/robmadole)
+// - Brian Talbot (https://github.com/talbs)
+// - Jory Raphael (https://github.com/sensibleworld)
+// - Mike Wilkerson (https://github.com/mlwilkerson)
+// - Geremia Taglialatela (https://github.com/tagliala)
+// --------------------------------------------------------------------------
+// Este arquivo inclui o pacote de ícones FREE do Font Awesome 5
+
+$fa-font-path: "/modules/core/fonts/fontawesome5" !default;
+@import "~@fortawesome/fontawesome-free/scss/regular";
+@import "~@fortawesome/fontawesome-free/scss/solid";
+@import "~@fortawesome/fontawesome-free/scss/brands";
+@import "~@fortawesome/fontawesome-free/scss/fontawesome";

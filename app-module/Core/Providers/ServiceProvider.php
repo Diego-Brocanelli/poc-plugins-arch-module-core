@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Module\Core\Providers;
 
-use App\Module\Core\Console\Commands\CoreCommand;
 use App\Module\Core\Libraries\Plugins\Handler;
 use App\Module\Core\Libraries\Templates\Directives;
-use Illuminate\Support\Str;
+use App\Module\Core\View\Components\Form;
 
 /**
  * O serviceProvider é a forma que um pacote se comunicar com o projeto principal do Laravel.
@@ -48,7 +47,28 @@ class ServiceProvider extends ModuleServiceProvider
 
         (new Directives())->boot();
 
-        // Adaptações aqui ...
+        // Este é o ServiceProvider principal deste pacote.
+        // Para que o mecanismo de plugins possa gerenciá-lo, é preciso
+        // registrá-lo como módulo.
+        // -----------------------------------------------------------------------
+        // Obs: é normal, em alguns casos, a existência de mais de um 
+        // ServiceProvider em um mesmo pacote. Neste caso, apenas um
+        // deverão ser registrado como o principal, responsável por 
+        // dar visibilidade ao módulo dentro do mecanismo de plugins
+        Handler::instance()->registerModule(self::class);
+
+        $this->loadViewComponentsAs($this->sufix(), [
+            Form\InputDate::class,
+            Form\InputEmail::class,
+            Form\InputFile::class,
+            Form\InputNumber::class,
+            Form\InputPassword::class,
+            Form\InputRange::class,
+            Form\InputText::class,
+            Form\InputTime::class,
+            Form\Select::class,
+            Form\Textarea::class,
+        ]);
     }
 
     /**

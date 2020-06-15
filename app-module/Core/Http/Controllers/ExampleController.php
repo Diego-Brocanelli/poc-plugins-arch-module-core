@@ -16,7 +16,14 @@ class ExampleController extends Controller
         // Caso não precise mudar nada, o construtor pode ser removido daqui
     }
 
-    public function show()
+    public function index()
+    {
+        return view('core::examples.admin-grid')->with([
+            'title' => 'Grade de Teste'
+        ]);
+    }
+
+    public function create()
     {
         return view('core::examples.admin-form')->with([
             'title' => 'Formulário de Teste'

@@ -6,18 +6,14 @@
 
         <title>@yield('title')</title>
 
-        @foreach(front_styles() as $style)
-        <link rel="stylesheet" href="{{ $style }}">
-        @endforeach
+        @foreach(front_styles() as $style)<link rel="stylesheet" href="{{ $style }}"> @endforeach
 
         @stack('styles')
 
-        @foreach(front_scripts_top() as $script)
-        <script src="{{ $script }}"></script>
-        @endforeach
+        @foreach(front_scripts_top() as $script)<script src="{{ $script }}"></script> @endforeach
         
     </head>
 
     @yield('body')
-
+    
 </html>

@@ -56,7 +56,8 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "process-timeout":0
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -66,7 +67,9 @@
         ],
         "test": [
             "composer dumpautoload --ansi; vendor/bin/phpunit"
+        ],
+        "watch": [
+            "while inotifywait --exclude='.git' -e 'modify' -e 'create' -e 'delete' -r -q ./; do composer dumpautoload; done"
         ]
     }
-    
 }
